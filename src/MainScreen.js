@@ -5,9 +5,13 @@ import moment from 'moment';
 import {Appointment} from './components/Appointment';
 import {Status} from './components/Status';
 import {COLORS, FONTS, MOCK_DATA, SIZES} from './constants';
+import {useInterval} from './hooks/useInterval';
 
 export const MainScreen = ({}) => {
   const [data, setData] = React.useState(MOCK_DATA.data);
+
+  const forceUpdate = React.useState(0)[1];
+  useInterval(forceUpdate, 30 * 1000);
 
   const allAppointments = React.useMemo(() => {
     return data.reduce(
@@ -29,6 +33,10 @@ export const MainScreen = ({}) => {
   }, [allAppointments]);
 
   const renderAppointmentItem = React.useCallback(({item}) => {
+    const now = new Date();
+    const showLine = now.getHours() == item.hour.split(':')[0];
+    const linePos = ~~((now.getMinutes() / 60) * 100) + '%';
+
     return (
       <View style={styles.flatList.item.container}>
         <View style={styles.flatList.item.hour.container}>
@@ -40,6 +48,34 @@ export const MainScreen = ({}) => {
               {item.appointments.map((appointment, index) => (
                 <Appointment key={index} data={appointment} />
               ))}
+            </View>
+          )}
+
+          {showLine && (
+            <View
+              style={{
+                position: 'absolute',
+                left: -5,
+                top: linePos,
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '200%',
+              }}>
+              <View
+                style={{
+                  borderRadius: 10,
+                  width: 10,
+                  height: 10,
+                  backgroundColor: 'red',
+                }}></View>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: 'red',
+                  flex: 1,
+                  padding: 0,
+                  height: 0,
+                }}></View>
             </View>
           )}
         </View>
